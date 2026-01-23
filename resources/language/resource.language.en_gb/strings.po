@@ -3362,3 +3362,11 @@ msgstr ""
 msgctxt "#33800"
 msgid "Kodi Companion is a Emby server addon which keeps track of deleted content"
 msgstr ""
+
+msgctxt "#33801"
+msgid "Detect video extension from STRM URL"
+msgstr "Detect video extension from STRM URL"
+
+msgctxt "#33802"
+msgid "When video format cannot be determined from Emby metadata, STRM path or URL, use HEAD request to resolve final URL. This causes sync to be slower. Massively fetching download addresses may also trigger cloud provider risk controls. Use with caution."
+msgstr "When video format cannot be determined from Emby metadata, STRM path or URL, use HEAD request to resolve final URL. This causes sync to be slower. Massively fetching download addresses may also trigger cloud provider risk controls. Use with caution."
