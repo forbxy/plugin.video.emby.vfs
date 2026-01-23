@@ -122,8 +122,6 @@ class VideoDatabase:
 
                     KodiFullPath = f"{DataPath[0]}{DataFile[1]}"
 
-                    if KodiFullPath.startswith("http://127.0.0.1:57342/") or KodiFullPath.startswith("dav://127.0.0.1:57342/"):
-                        KodiFullPath = f"{KodiFullPath.replace('|redirect-limit=1000', '')}|redirect-limit=1000"
 
                     return KodiFullPath, Image, ItemData[0]
 
@@ -225,10 +223,7 @@ class VideoDatabase:
             return {}
 
         if not PathAndFilename:
-            if MovieData[16].endswith('|redirect-limit=1000'):
-                PathAndFilename = f"{MovieData[16].replace('|redirect-limit=1000', '')}{MovieData[27]}|redirect-limit=1000"
-            else:
-                PathAndFilename = f"{MovieData[16]}{MovieData[27]}"
+            PathAndFilename = f"{MovieData[16]}{MovieData[27]}"
 
         Artwork = self.get_artwork(KodiItemId, "movie", "")
         People = self.get_people_artwork(KodiItemId, "movie")
@@ -296,10 +291,7 @@ class VideoDatabase:
             return {}
 
         if not PathAndFilename:
-            if MusicVideoData[11].endswith('|redirect-limit=1000'):
-                PathAndFilename = f"{MusicVideoData[11].replace('|redirect-limit=1000', '')}{MusicVideoData[12]}|redirect-limit=1000"
-            else:
-                PathAndFilename = f"{MusicVideoData[11]}{MusicVideoData[12]}"
+            PathAndFilename = f"{MusicVideoData[11]}{MusicVideoData[12]}"
 
         Artwork = self.get_artwork(KodiItemId, "musicvideo", "")
         People = self.get_people_artwork(KodiItemId, "musicvideo")
@@ -736,10 +728,7 @@ class VideoDatabase:
             return {}
 
         if not PathAndFilename:
-            if EpisodeData[17].endswith('|redirect-limit=1000'):
-                PathAndFilename = f"{EpisodeData[17].replace('|redirect-limit=1000', '')}{EpisodeData[19]}|redirect-limit=1000"
-            else:
-                PathAndFilename = f"{EpisodeData[17]}{EpisodeData[19]}"
+            PathAndFilename = f"{EpisodeData[17]}{EpisodeData[19]}"
 
         People = self.get_people_artwork(KodiItemId, "episode")
         People += self.get_people_artwork(EpisodeData[29], "tvshow")
@@ -1473,9 +1462,9 @@ class VideoDatabase:
                 UrlMod = ArtworkData[4].split("|")
 
                 if AddLabel:
-                    UrlMod = f"{UrlMod[0].replace('-download', '')}-download|redirect-limit=1000"
+                    UrlMod = f"{UrlMod[0].replace('-download', '')}-download"
                 else:
-                    UrlMod = f"{UrlMod[0].replace('-download', '')}|redirect-limit=1000"
+                    UrlMod = f"{UrlMod[0].replace('-download', '')}"
 
                 self.update_artwork(ArtworkData[0], UrlMod)
                 Artworks += ((UrlMod,),)

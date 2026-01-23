@@ -454,7 +454,7 @@ class MusicDatabase:
                     FileNameNew = FileName
 
             Path = f'{"/".join(Data[:-1])}/{FileNameNew}'
-            Path = common_db.toggle_path(Path, NewPath).replace("|redirect-limit=1000", "")
+            Path = common_db.toggle_path(Path, NewPath)
             self.cursor.execute("UPDATE song SET strVideoURL = ? WHERE idSong = ?", (Path, VideoURL[0])) # Trailing spaces are used for MusicBrainzTrackID unificaation
 
     # artwork

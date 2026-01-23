@@ -1379,7 +1379,6 @@ class Library:
                         if utils.useDirectPaths:
                             ThemeItemPath = ThemeItem['KodiFullPath']
                         else:
-                            ThemeItem['KodiPath'] = ThemeItem['KodiPath'].replace("|redirect-limit=1000", "")
                             ThemeItemPath = f"{ThemeItem['KodiPath']}{Filename}"
 
                     XMLData += f"    <file>{utils.encode_XML(ThemeItemPath)}</file>\n".encode("utf-8")

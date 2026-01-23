@@ -33,7 +33,7 @@ def CacheAllEntries(urls, ProgressBar):
             continue
 
         Folder = url[0].split("/")
-        Data = url[0][url[0].rfind("/") + 1:].replace("|redirect-limit=1000", "").split("-")
+        Data = url[0][url[0].rfind("/") + 1:].split("-")
 
         if len(Data) < 4 or len(Folder) < 5:
             xbmc.log(f"EMBY.helper.pluginmenu: Artwork cache: Invalid item found {url}", 2) # LOGWARNING
