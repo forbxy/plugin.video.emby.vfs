@@ -562,7 +562,7 @@ def GetRequest(client, Payload, isDelayedContent, isPicture, isAudio, isVideo):
         return
 
     # Use cached responses
-    if MetaData['EmbyId'] in utils.HTTPResponseCaches:
+    if isVideo and MetaData['EmbyId'] in utils.HTTPResponseCaches:
         client.send(utils.HTTPResponseCaches[MetaData['EmbyId']])
         xbmc.log(f"EMBY.hooks.webservice: Cached response EmbyId: {MetaData['EmbyId']}", 1) # LOGINFO
         xbmc.log(f"EMBY.hooks.webservice: Cached response Payload: {utils.HTTPResponseCaches[MetaData['EmbyId']]}", 0) # LOGDEBUG
