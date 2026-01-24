@@ -3372,3 +3372,7 @@ msgstr "STRM从最终url获取视频格式"
 msgctxt "#33802"
 msgid "When video format cannot be determined from Emby metadata, STRM path or URL, use HEAD request to resolve final URL. This causes sync to be slower. Massively fetching download addresses may also trigger cloud provider risk controls. Use with caution."
 msgstr "当无法从emby元数据,strm文件路径以及url中获取格式信息时，通过HEAD请求strm文件内的url拿取最终下载地址并获取格式，这会导致同步变慢，短时大量获取下载地址也可能被云服务商风控，谨慎使用此功能"
+
+msgctxt "#33803"
+msgid "Disable Emby nodes"
+msgstr "禁用Emby节点"

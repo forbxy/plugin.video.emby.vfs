@@ -41,6 +41,7 @@ EmbyServerVersionResync = "4.9.0.25"
 refreshskin = False
 device_name = "Kodi"
 xspplaylists = False
+disableEmbyNodesVar = False
 animateicon = True
 TranscodeFormatVideo = ""
 TranscodeFormatAudio = ""
@@ -879,6 +880,7 @@ def InitSettings():
     load_settings_bool('PauseOther')
     load_settings_bool('refreshskin')
     load_settings_bool('animateicon')
+    load_settings_bool('disableEmbyNodesVar')
     load_settings_bool('enablehttp2')
     load_settings_bool('menuOptions')
     load_settings_bool('xspplaylists')
