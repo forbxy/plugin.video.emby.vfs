@@ -364,7 +364,7 @@ def set_path_filename(Item, ServerId, MediaSource, isDynamic=False):
                                 found_ext = extract_ext(final_url)
                     except Exception:
                         pass
-            name = Item.get('Name', 'unknown')
+            name = quote(Item.get('Name', 'unknown'))
             if found_ext:
                 Item['KodiFilename'] = f"{name}.{found_ext}"
             else:
