@@ -712,6 +712,10 @@ def set_playstate(Item):
     else:
         Item['KodiPlaybackPositionTicks'] = None
 
+    if 'CustomData' in UserData and 'PlayerState' in UserData['CustomData']:
+        Item['PlayerState'] = UserData['CustomData']['PlayerState']
+        xbmc.log(f"EMBY.core.common: set_playstate - Found PlayerState in UserData for {Item.get('Id')}", 1)
+
 def set_DateCreated(Item):
     if 'DateCreated' in Item:
         Item['KodiDateCreated'] = utils.convert_to_local(Item['DateCreated'])
