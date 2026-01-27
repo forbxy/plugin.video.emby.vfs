@@ -50,7 +50,18 @@ def load_MetaData(Payload, isPicture, isAudio):
         else:
             Data = DataFile.split("-") # MetaData
             EmbyId = Data[1]
-            MediaSources = [[{'Id': Data[2], 'IntroStartPositionTicks': 0, 'IntroEndPositionTicks': 0, 'CreditsPositionTicks': 0, 'Path': ""}, [], [], []]]
+            Path = ""
+
+            # Fix: Decode hex path if available
+            if len(Data) >= 4:
+                try:
+                    Path = bytes.fromhex(Data[3]).decode('utf-8')
+                    # If we successfully decoded a path, treat this as an http direct stream candidate
+                    MetaData['isHttp'] = True
+                except:
+                    pass
+
+            MediaSources = [[{'Id': Data[2], 'IntroStartPositionTicks': 0, 'IntroEndPositionTicks': 0, 'CreditsPositionTicks': 0, 'Path': Path}, [], [], []]]
     else:
         MetaData["PlayerId"] = 1
         EmbyId = PayloadSplit[-3]

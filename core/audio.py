@@ -77,7 +77,13 @@ class Audio:
             self.SQLs["music"].common_db.delete_artwork(UpdateKodiItemIdCurrent, "song")
             self.SQLs["music"].delete_link_song_artist(UpdateKodiItemIdCurrent)
             KodiAlbumIds, KodiAlbumLibraryIds = self.SQLs["emby"].get_MusicAlbum_by_EmbyId(UpdateItem['MusicAlbumId'])
-            KodiAlbumId = KodiAlbumIds[KodiAlbumLibraryIds.index(UpdateItem['LibraryId'])]
+
+            try:
+                KodiAlbumId = KodiAlbumIds[KodiAlbumLibraryIds.index(UpdateItem['LibraryId'])]
+            except ValueError:
+                xbmc.log(f"EMBY.core.audio: Album {UpdateItem['MusicAlbumId']} not found for Library {UpdateItem['LibraryId']} - Skip update", 2) # LOGWARNING
+                continue
+
             self.SQLs["music"].update_song(UpdateKodiItemIdCurrent, UpdateItem['KodiPathId'], KodiAlbumId, UpdateItem['ArtistItemsName'], UpdateItem['MusicGenre'], UpdateItem['Name'], UpdateItem['IndexNumber'], UpdateItem['KodiRunTimeTicks'], UpdateItem['KodiPremiereDate'], UpdateItem['KodiProductionYear'], UpdateItem['KodiFilename'], UpdateItem['CommunityRating'], UpdateItem['Overview'], UpdateItem['KodiDateCreated'], BitRate, SampleRate, Channels, UpdateItem['ProviderIds']['MusicBrainzTrack'], UpdateItem['ArtistItemsSortName'], UpdateItem['KodiPath'], PlaylistId)
             self.set_links(UpdateItem, UpdateKodiItemIdCurrent)
             self.SQLs["emby"].update_reference_audio(UpdateItem['Id'], UpdateItem['LibraryId'], UpdateItem['MusicAlbumId'], EmbyMusicArtistIds, EmbyMusicGenreIds)
