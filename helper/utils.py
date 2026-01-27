@@ -1,7 +1,7 @@
 from _thread import start_new_thread, allocate_lock
 import os
 import json
-from urllib.parse import quote
+from urllib.parse import quote, unquote, urlparse, urlunparse
 from datetime import datetime, timedelta, timezone
 from dateutil import tz, parser
 
@@ -265,6 +265,23 @@ LinkMusicVideos = True
 XbmcMonitor = None
 Tos = "CS5, EF (Expedited Forwarding)"
 IconExtensions = ("jpg", "png", "gif", "webp", "apng", "avif", "svg", "ukn")
+
+def normalize_url(url):
+    try:
+        parsed = urlparse(url)
+        path = unquote(parsed.path)
+        new_path = quote(path, safe='/')
+        new_url = urlunparse((
+            parsed.scheme,
+            parsed.netloc,
+            new_path,
+            parsed.params,
+            parsed.query,
+            parsed.fragment
+        ))
+        return new_url
+    except:
+        return url
 
 def refresh_widgets(isVideo):
     with WidgetsRefreshLock:
