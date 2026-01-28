@@ -270,7 +270,7 @@ def normalize_url(url):
     try:
         parsed = urlparse(url)
         path = unquote(parsed.path)
-        new_path = quote(path, safe='/')
+        new_path = quote(path, safe='/@:+$,;=&')
         new_url = urlunparse((
             parsed.scheme,
             parsed.netloc,
@@ -736,7 +736,14 @@ def get_Filename(Path, NativeMode):
     Filename = Path[Pos + 1:]
 
     if not NativeMode and webservicemode != "pathsubstitution":
-        Filename = quote(Filename)
+        if "://" in Path:
+            if '?' in Filename:
+                base, query = Filename.split('?', 1)
+                Filename = f"{quote(unquote(base), safe='@:+$,;=&')}?{query}"
+            else:
+                Filename = quote(unquote(Filename), safe='@:+$,;=&')
+        else:
+            Filename = quote(Filename)
 
     return Filename
 
