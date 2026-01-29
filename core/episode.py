@@ -105,11 +105,7 @@ class Episode:
 
         common.set_playstate(Item)
         common.set_RunTimeTicks(Item)
-        
-        if Item.get('PlayerState'):
-             xbmc.log(f"EMBY.core.episode: Applying PlayerState for {Item['Id']}", 1)
-
-        Update = self.SQLs["video"].update_bookmark_playstate(Item['KodiFileId'], Item['KodiPlayCount'], Item['KodiLastPlayedDate'], Item['KodiPlaybackPositionTicks'], Item['KodiRunTimeTicks'], Item.get('PlayerState'))
+        Update = self.SQLs["video"].update_bookmark_playstate(Item['KodiFileId'], Item['KodiPlayCount'], Item['KodiLastPlayedDate'], Item['KodiPlaybackPositionTicks'], Item['KodiRunTimeTicks'])
 
         if UpdateKodiFavorite:
             self.set_favorite(Item['IsFavorite'], Item)

@@ -488,32 +488,6 @@ def stop_playback(delete, PlaybackEnded):
     if PlaybackEnded and PlayingItemLocal[0]['RunTimeTicks']:
         PlayingItemLocal[0]['PositionTicks'] = PlayingItemLocal[0]['RunTimeTicks']
 
-    # Try to capture PlayerState (libbluraystate) for ISOs/Blurays
-    if not PlaybackEnded and PlayingItemLocal[6] in ("movie", "episode", "musicvideo") and PlayingItemLocal[4]:
-        try:
-            ServerId = PlayingItemLocal[4].ServerData['ServerId']
-            embydb = dbio.DBOpenRO(ServerId, "stop_playback_state")
-            # Verify method name in emby_db.py or use api.py reference
-            KodiId = embydb.get_KodiId_by_EmbyId_EmbyType(PlayingItemLocal[0]['ItemId'], PlayingItemLocal[6].capitalize())
-            dbio.DBCloseRO(ServerId, "stop_playback_state")
-            xbmc.log(f"EMBY.helper.player: stop_playback - KodiId: {KodiId}", 1)
-
-            if KodiId:
-                videodb = dbio.DBOpenRO("video", "stop_playback_state")
-                idFile = videodb.get_idFile(KodiId, PlayingItemLocal[6])
-                xbmc.log(f"EMBY.helper.player: stop_playback - idFile: {idFile}", 1)
-                
-                if idFile:
-                    PlayerState = videodb.get_bookmark_playstate(idFile)
-                    xbmc.log(f"EMBY.helper.player: stop_playback - Found PlayerState len: {len(PlayerState) if PlayerState else 0}", 1)
-                    
-                    if PlayerState:
-                        PlayingItemLocal[0]['PlayerState'] = PlayerState
-                        xbmc.log(f"EMBY.helper.player: Captured PlayerState for {PlayingItemLocal[0]['ItemId']}", 1)
-                dbio.DBCloseRO("video", "stop_playback_state")
-        except Exception as Error:
-            xbmc.log(f"EMBY.helper.player: Failed to capture PlayerState: {Error}", 2)
-
     utils.update_querycache_userdata(((str(PlayingItemLocal[0]['ItemId']), PlayingItemLocal[0]['PositionTicks'], utils.currenttime(), -1, PlaybackEnded),))
     PlaylistEmby[PlayingItem[5]] = PlayingItemLocal[4].API.session_stop(PlayingItemLocal[0], PlaylistKodi[PlayingItem[5]], PlaylistEmby[PlayingItem[5]])
     close_SkipIntroDialog()

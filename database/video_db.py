@@ -49,19 +49,6 @@ class VideoDatabase:
         except Exception as Error:
             xbmc.log(f"EMBY.database.video_db: Database delete index error: {Error}", 3) # LOGERROR
 
-    def get_idFile(self, KodiItemId, ContentType):
-        if ContentType == "movie":
-            self.cursor.execute("SELECT idFile FROM movie WHERE idMovie = ?", (KodiItemId,))
-        elif ContentType == "musicvideo":
-            self.cursor.execute("SELECT idFile FROM musicvideo WHERE idMVideo = ?", (KodiItemId,))
-        elif ContentType == "episode":
-            self.cursor.execute("SELECT idFile FROM episode WHERE idEpisode = ?", (KodiItemId,))
-        else:
-            return None
-        
-        Result = self.cursor.fetchone()
-        return Result[0] if Result else None
-
     # playcount
     def get_playcount(self, KodiItemId, ContentType):
         if ContentType == "movie":
@@ -1314,16 +1301,7 @@ class VideoDatabase:
         for StartPositionTicks, Image in list(KodiChapters.items()):
             self.cursor.execute("INSERT INTO bookmark(idFile, timeInSeconds, totalTimeInSeconds, thumbNailImage, player, type) VALUES (?, ?, ?, ?, ?, ?)", (KodiFileId, StartPositionTicks, RunTimeTicks, Image, "VideoPlayer", 0))
 
-    def get_bookmark_playstate(self, KodiFileId):
-        self.cursor.execute("SELECT playerState FROM bookmark WHERE idFile = ? AND type = ?", (KodiFileId, "1"))
-        Data = self.cursor.fetchone()
-
-        if Data and Data[0]:
-            return Data[0]
-
-        return None
-
-    def update_bookmark_playstate(self, KodiFileId, playcount, date_played, Progress, Runtime, PlayerState=None):
+    def update_bookmark_playstate(self, KodiFileId, playcount, date_played, Progress, Runtime):
         Update = False
 
         self.cursor.execute("SELECT timeInSeconds FROM bookmark WHERE idFile = ? AND type = ?", (KodiFileId, "1"))
@@ -1334,24 +1312,14 @@ class VideoDatabase:
 
             if Progress:
                 if CurrentProgress != Progress:
-                    if PlayerState:
-                        self.cursor.execute("UPDATE bookmark SET timeInSeconds = ?, totalTimeInSeconds = ?, playerState = ? WHERE idFile = ?", (Progress, Runtime, PlayerState, KodiFileId))
-                    else:
-                        self.cursor.execute("UPDATE bookmark SET timeInSeconds = ?, totalTimeInSeconds = ? WHERE idFile = ?", (Progress, Runtime, KodiFileId))
-
+                    self.cursor.execute("UPDATE bookmark SET timeInSeconds = ?, totalTimeInSeconds = ? WHERE idFile = ?", (Progress, Runtime, KodiFileId))
                     Update = True
-                elif PlayerState: # Same progress but maybe playerState update
-                    self.cursor.execute("UPDATE bookmark SET playerState = ? WHERE idFile = ?", (PlayerState, KodiFileId))
             else:
                 self.cursor.execute("DELETE FROM bookmark WHERE idFile = ? AND type = ?", (KodiFileId, "1"))
                 Update = True
         elif Progress:
             Update = True
-
-            if PlayerState:
-                self.cursor.execute("INSERT INTO bookmark(idFile, timeInSeconds, totalTimeInSeconds, player, type, playerState) VALUES (?, ?, ?, ?, ?, ?)", (KodiFileId, Progress, Runtime, "VideoPlayer", 1, PlayerState))
-            else:
-                self.cursor.execute("INSERT INTO bookmark(idFile, timeInSeconds, totalTimeInSeconds, player, type) VALUES (?, ?, ?, ?, ?)", (KodiFileId, Progress, Runtime, "VideoPlayer", 1))
+            self.cursor.execute("INSERT INTO bookmark(idFile, timeInSeconds, totalTimeInSeconds, player, type) VALUES (?, ?, ?, ?, ?)", (KodiFileId, Progress, Runtime, "VideoPlayer", 1))
 
         # Update playcounter and last played date
         self.cursor.execute("SELECT playCount FROM files WHERE idFile = ?", (KodiFileId,))

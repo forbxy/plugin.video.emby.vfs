@@ -140,10 +140,7 @@ class Movies:
             self.set_favorite(Item['IsFavorite'], Item)
 
         for KodiFileId in self.SQLs["video"].get_KodiFileId_by_videoversion(Item['KodiItemId'], "movie"):
-            if Item.get('PlayerState'):
-                xbmc.log(f"EMBY.core.movies: Applying PlayerState for {Item['Id']}", 1)
-            
-            if self.SQLs["video"].update_bookmark_playstate(KodiFileId[0], Item['KodiPlayCount'], Item['KodiLastPlayedDate'], Item['KodiPlaybackPositionTicks'], Item['KodiRunTimeTicks'], Item.get('PlayerState')):
+            if self.SQLs["video"].update_bookmark_playstate(KodiFileId[0], Item['KodiPlayCount'], Item['KodiLastPlayedDate'], Item['KodiPlaybackPositionTicks'], Item['KodiRunTimeTicks']):
                 Update = True
 
             xbmc.log(f"EMBY.core.movies: USERDATA [{KodiFileId[0]} / {Item['KodiItemId']}] {Item['Id']}", int(IncrementalSync)) # LOG
