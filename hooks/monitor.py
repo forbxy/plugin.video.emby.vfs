@@ -497,6 +497,21 @@ def setup():
         utils.set_settings('MinimumSetup', utils.MinimumVersion)
         xmls.sources() # verify sources.xml
 
+        # Ensure correct content type for Emby sources (Fix for episode artwork)
+        SQLs = {}
+        dbio.DBOpenRW("video", "init_sources", SQLs)
+        if "video" in SQLs:
+             # Addon Mode (Stream via Emby)
+             SQLs["video"].update_source_content("/emby_addon_mode/tvshows/", "tvshows", "metadata.local")
+             SQLs["video"].update_source_content("/emby_addon_mode/http/tvshows/", "tvshows", "metadata.local")
+             # Native Mode (Http)
+             SQLs["video"].update_source_content("http://127.0.0.1:57342/tvshows/", "tvshows", "metadata.local")
+             SQLs["video"].update_source_content("http://127.0.0.1:57342/http/tvshows/", "tvshows", "metadata.local")
+             # Native Mode (Dav)
+             SQLs["video"].update_source_content("dav://127.0.0.1:57342/tvshows/", "tvshows", "metadata.local")
+             SQLs["video"].update_source_content("dav://127.0.0.1:57342/http/tvshows/", "tvshows", "metadata.local")
+             dbio.DBCloseRW("video", "init_sources", SQLs)
+
         if xmls.advanced_settings(): # verify advancedsettings.xml
             return False
 
