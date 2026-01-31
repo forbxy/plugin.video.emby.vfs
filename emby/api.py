@@ -246,97 +246,114 @@ class API:
             Params['SortBy'] = "None"
 
         for _ in range(2):
-            Payload = {}
-            Params['Ids'] = ",".join(Ids)
+            if not Ids:
+                break
+            
+            # Process in batches to avoid MemoryError on large result sets
+            IdsToQuery = list(Ids)
+            BatchSize = 2000
+            
+            for i in range(0, len(IdsToQuery), BatchSize):
+                BatchIds = IdsToQuery[i:i + BatchSize]
+                
+                if not BatchIds:
+                    break
 
-            # Query content
-            if not Dynamic:
-                if LibraryId and LibraryId.lower() != "unknown": # Kodi start updates
-                    _, _, Payload = self.EmbyServer.http.request("GET", Request, Params, {}, False, "", False, BusyFunction, "", LowPriority, PlaybackCheck)
+                if utils.SystemShutdown:
+                    break
 
-                    if 'Items' in Payload:
-                        for Item in Payload['Items']:
-                            Item['LibraryId'] = LibraryId
-                            del Ids[Ids.index(Item['Id'])]
-                            ItemsQueue.put(Item)
-                            CounterFound += 1
-                elif LibraryId == "SingleId":
-                    _, _, Payload = self.EmbyServer.http.request("GET", Request, Params, {}, False, "", False, BusyFunction, "", LowPriority, PlaybackCheck)
+                Payload = {}
+                Params['Ids'] = ",".join(BatchIds)
 
-                    if 'Items' in Payload:
-                        for Item in Payload['Items']:
-                            del Ids[Ids.index(Item['Id'])]
-                            ItemsQueue.put(Item)
-                            CounterFound += 1
-                else: # realtime updates via websocket
-                    if SubContent: # Workaround: Subcontent does not always respect ParentId queries
-                        if not LibrarySyncedIds:
-                            embydb = dbio.DBOpenRO(self.EmbyServer.ServerData['ServerId'], "Realtimesync_Subcontent")
-                            LibrarySyncedIds = embydb.get_LibraryIds_by_EmbyIds(Ids)
-                            dbio.DBCloseRO(self.EmbyServer.ServerData['ServerId'], "Realtimesync_Subcontent")
-
+                # Query content
+                if not Dynamic:
+                    if LibraryId and LibraryId.lower() != "unknown": # Kodi start updates
                         _, _, Payload = self.EmbyServer.http.request("GET", Request, Params, {}, False, "", False, BusyFunction, "", LowPriority, PlaybackCheck)
 
                         if 'Items' in Payload:
-                            for Item in Payload['Items']: # Check if content is an synced content update
-                                if Item['Type'] == MediaType:
-                                    if Item['Id'] in LibrarySyncedIds:
-                                        for LibrarySyncedId in LibrarySyncedIds[Item['Id']]:
-                                            if MediaType in self.EmbyServer.library.LibrarySyncedContent[LibrarySyncedId[0]]:
-                                                if Item['Id'] in Ids:
-                                                    del Ids[Ids.index(Item['Id'])]
+                            for Item in Payload['Items']:
+                                Item['LibraryId'] = LibraryId
+                                if Item['Id'] in Ids:
+                                    del Ids[Ids.index(Item['Id'])]
+                                ItemsQueue.put(Item)
+                                CounterFound += 1
+                    elif LibraryId == "SingleId":
+                        _, _, Payload = self.EmbyServer.http.request("GET", Request, Params, {}, False, "", False, BusyFunction, "", LowPriority, PlaybackCheck)
 
-                                                Item['LibraryId'] = LibrarySyncedId[0]
-                                                ItemsQueue.put(Item)
-                                                CounterFound += 1
-                    else:
-                        for LibrarySyncedId in self.EmbyServer.library.LibrarySyncedNames:
-                            CounterFoundSubItems = 0
-
-                            if str(LibrarySyncedId) != "999999999":
-                                Params.update({'ParentId': LibrarySyncedId})
-                            else:
-                                if MediaType != "Person":
-                                    continue
+                        if 'Items' in Payload:
+                            for Item in Payload['Items']:
+                                if Item['Id'] in Ids:
+                                    del Ids[Ids.index(Item['Id'])]
+                                ItemsQueue.put(Item)
+                                CounterFound += 1
+                    else: # realtime updates via websocket
+                        if SubContent: # Workaround: Subcontent does not always respect ParentId queries
+                            if not LibrarySyncedIds:
+                                embydb = dbio.DBOpenRO(self.EmbyServer.ServerData['ServerId'], "Realtimesync_Subcontent")
+                                LibrarySyncedIds = embydb.get_LibraryIds_by_EmbyIds(Ids)
+                                dbio.DBCloseRO(self.EmbyServer.ServerData['ServerId'], "Realtimesync_Subcontent")
 
                             _, _, Payload = self.EmbyServer.http.request("GET", Request, Params, {}, False, "", False, BusyFunction, "", LowPriority, PlaybackCheck)
 
                             if 'Items' in Payload:
-                                CounterFoundSubItems += len(Payload['Items'])
-
-                                for Item in Payload['Items']:
+                                for Item in Payload['Items']: # Check if content is an synced content update
                                     if Item['Type'] == MediaType:
-                                        Item['LibraryId'] = LibrarySyncedId
+                                        if Item['Id'] in LibrarySyncedIds:
+                                            for LibrarySyncedId in LibrarySyncedIds[Item['Id']]:
+                                                if MediaType in self.EmbyServer.library.LibrarySyncedContent[LibrarySyncedId[0]]:
+                                                    if Item['Id'] in Ids:
+                                                        del Ids[Ids.index(Item['Id'])]
 
-                                        if Item['Id'] in Ids:
-                                            del Ids[Ids.index(Item['Id'])]
+                                                    Item['LibraryId'] = LibrarySyncedId[0]
+                                                    ItemsQueue.put(Item)
+                                                    CounterFound += 1
+                        else:
+                            for LibrarySyncedId in self.EmbyServer.library.LibrarySyncedNames:
+                                CounterFoundSubItems = 0
 
-                                        ItemsQueue.put(Item)
-                                        CounterFound += 1
+                                if str(LibrarySyncedId) != "999999999":
+                                    Params.update({'ParentId': LibrarySyncedId})
+                                else:
+                                    if MediaType != "Person":
+                                        continue
 
-                            if CounterFoundSubItems == len(Ids) or utils.SystemShutdown: # All data received, no need to check additional libraries
-                                break
-            else: # dynamic node query
-                _, _, Payload = self.EmbyServer.http.request("GET", Request, Params, {}, False, "", False, BusyFunction, "", LowPriority, PlaybackCheck)
+                                _, _, Payload = self.EmbyServer.http.request("GET", Request, Params, {}, False, "", False, BusyFunction, "", LowPriority, PlaybackCheck)
 
-                if 'Items' in Payload and Payload['Items']:
-                    # Restore item order as requsted -> Emby sorts by ascending Ids
-                    if not IdsBackup:
-                        ItemsSorted = IdsTotal * [()] # pre allocate memory
-                        IdsBackup = Ids.copy()
+                                if 'Items' in Payload:
+                                    CounterFoundSubItems += len(Payload['Items'])
 
-                    for Item in Payload['Items']:
-                        if MediaType in ('All', Item['Type']):
-                            if Item['Id'] in Ids:
-                                ItemsSorted[IdsBackup.index(Item['Id'])] = Item
-                                del Ids[Ids.index(Item['Id'])]
-                            else:
-                                xbmc.log(f"EMBY.emby.api: ItemId not found in Ids: {Item['Id']}", 2) # LOGWARNING
+                                    for Item in Payload['Items']:
+                                        if Item['Type'] == MediaType:
+                                            Item['LibraryId'] = LibrarySyncedId
 
-                    CounterFound += len(Payload['Items'])
+                                            if Item['Id'] in Ids:
+                                                del Ids[Ids.index(Item['Id'])]
 
-            del Payload  # release memory
+                                            ItemsQueue.put(Item)
+                                            CounterFound += 1
 
+                                if CounterFoundSubItems == len(Ids) or utils.SystemShutdown: # All data received, no need to check additional libraries
+                                    break
+                else: # dynamic node query
+                    _, _, Payload = self.EmbyServer.http.request("GET", Request, Params, {}, False, "", False, BusyFunction, "", LowPriority, PlaybackCheck)
+
+                    if 'Items' in Payload and Payload['Items']:
+                        # Restore item order as requsted -> Emby sorts by ascending Ids
+                        if not IdsBackup:
+                            ItemsSorted = IdsTotal * [()] # pre allocate memory
+                            IdsBackup = Ids.copy()
+
+                        for Item in Payload['Items']:
+                            if MediaType in ('All', Item['Type']):
+                                if Item['Id'] in Ids:
+                                    ItemsSorted[IdsBackup.index(Item['Id'])] = Item
+                                    del Ids[Ids.index(Item['Id'])]
+                                else:
+                                    pass # Item already processed in previous batch or not found
+
+                        CounterFound += len(Payload['Items'])
+
+                del Payload  # release memory
             if utils.SystemShutdown or not self.async_throttle_queries(CounterFound, ProcessProgressId): # all requested items received
                 break
 

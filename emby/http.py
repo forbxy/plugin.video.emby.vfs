@@ -612,6 +612,9 @@ class HTTP:
         if isJSON:
             try:
                 return StatusCode, IncomingDataHeader, json.loads(PayloadTotal)
+            except MemoryError:
+                xbmc.log(f"EMBY.emby.http: Invalid json content {ConnectionId}: {IncomingDataHeader} error: MemoryError", 3) # LOGERROR
+                return 612, {}, ""
             except Exception as error:
                 xbmc.log(f"EMBY.emby.http: Invalid json content {ConnectionId}: {IncomingDataHeader} error: {error} payload: {PayloadTotal}", 3) # LOGERROR
                 return 612, {}, ""
