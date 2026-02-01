@@ -480,7 +480,7 @@ class Views:
                 library['ContentType'] = library.get('CollectionType', "mixed")
 
             if "Primary" in library["ImageTags"]:
-                IconPath = f"http://127.0.0.1:57342/picture/{self.EmbyServer.ServerData['ServerId']}/p-{library['Id']}-0-p-{library['ImageTags']['Primary']}"
+                IconPath = f"/emby_addon_mode/picture/{self.EmbyServer.ServerData['ServerId']}/p-{library['Id']}-0-p-{library['ImageTags']['Primary']}"
 
             self.ViewItems[library['Id']] = [utils.decode_XML(library['Name']), library['ContentType'], IconPath]
 
@@ -540,7 +540,7 @@ class Views:
             elif view['ContentType'] in ('music', 'audiobooks', 'podcasts', 'playlistsaudio'):
                 view['Icon'] = 'DefaultMusicSongs.png'
             else:
-                view['Icon'] = "special://home/addons/plugin.service.emby-next-gen/resources/icon.png"
+                view['Icon'] = "special://home/addons/plugin.service.emby-next-gen/resources/clearlogo.png"
 
         if view['ContentType'] not in ("rootaudio", "rootvideo"):
             if view['ContentType'] in ('music', 'audiobooks', 'podcasts', 'playlistsaudio'):
