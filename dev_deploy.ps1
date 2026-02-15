@@ -3,8 +3,26 @@
 
 $addonId = "plugin.service.emby-next-gen"
 
-# Kodi Addons 路径 (UWP版路径)
-$kodiAddonsPath = "$env:LOCALAPPDATA\Packages\XBMCFoundation.Kodi_4n2hpmxwrvr6p\LocalCache\Roaming\Kodi\addons"
+# 尝试自动检测 Kodi Addons 路径
+$possiblePaths = @(
+    "$env:APPDATA\Kodi\addons",                                                                     # 标准安装版 (exe)
+    "$env:LOCALAPPDATA\Packages\XBMCFoundation.Kodi_4n2hpmxwrvr6p\LocalCache\Roaming\Kodi\addons"   # UWP版
+)
+
+$kodiAddonsPath = $null
+
+foreach ($path in $possiblePaths) {
+    if (Test-Path -Path $path) {
+        $kodiAddonsPath = $path
+        Write-Host "Found Kodi addons directory at: $path" -ForegroundColor Green
+        break
+    }
+}
+
+if ($null -eq $kodiAddonsPath) {
+    Write-Error "Could not find Kodi addons directory at any known location."
+    exit 1
+}
 
 # 构建源路径和目标路径
 $sourcePath = $PSScriptRoot
