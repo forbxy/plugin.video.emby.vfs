@@ -340,53 +340,6 @@ class Views:
         self.update_nodes()
 
     def update_nodes(self):
-        if utils.disableEmbyNodesVar:
-            self.Nodes = {"NodesDynamic": [], "NodesSynced": []}
-            self.PictureNodes = {}
-            xbmc.log(f"EMBY.emby.views: disableEmbyNodesVar=True, removing all nodes by content check.", 1)
-            
-            # Helper to clean Emby nodes from a directory
-            def clean_emby_nodes(folder_path):
-                if not xbmcvfs.exists(folder_path):
-                    return
-                dirs, files = xbmcvfs.listdir(folder_path)
-                
-                # Check files
-                for file in files:
-                    full_path = folder_path + file
-                    is_emby = False
-                    
-                    if "emby_" in file:
-                        is_emby = True
-                    else:
-                        # Safety rule: check content matches the plugin ID
-                        try:
-                            f = xbmcvfs.File(full_path)
-                            content = f.read()
-                            f.close()
-                            # Check for the plugin ID or typical emby node structure
-                            if "plugin.service.emby-next-gen" in content or "EMBY" in content:
-                                is_emby = True
-                        except:
-                            xbmc.log(f"EMBY.emby.views: Failed to read file content: {full_path}", 2)
-                    
-                    if is_emby:
-                        xbmc.log(f"EMBY.emby.views: Deleting node file: {full_path}", 1)
-                        utils.delFile(full_path)
-
-                # Check directories (recursive deletion via utils.delFolder)
-                for directory in dirs:
-                    if "emby_" in directory:
-                        full_dir_path = folder_path + directory + "/"
-                        xbmc.log(f"EMBY.emby.views: Deleting node folder: {full_dir_path}", 1)
-                        utils.delFolder(full_dir_path)
-
-            clean_emby_nodes("special://profile/library/video/")
-            clean_emby_nodes("special://profile/library/music/")
-            clean_emby_nodes("special://profile/playlists/video/")
-            clean_emby_nodes("special://profile/playlists/music/")
-            return
-
         self.Nodes = {"NodesDynamic": [], "NodesSynced": []}
         self.PictureNodes = {}
 
@@ -458,10 +411,6 @@ class Views:
         self.add_nodes({'ContentType': "rootvideo"}, True)
 
     def update_views(self):
-        if utils.disableEmbyNodesVar:
-            self.ViewItems = {}
-            return
-
         Data = self.EmbyServer.API.get_views()
 
         if 'Items' in Data:
@@ -942,7 +891,6 @@ def add_xpsplaylist(view):
         return
 
     if view['ContentType'] in ('music', 'audiobooks', 'podcasts', 'playlistsaudio'):
-
         path = 'special://profile/playlists/music/'
     else:
         path = 'special://profile/playlists/video/'

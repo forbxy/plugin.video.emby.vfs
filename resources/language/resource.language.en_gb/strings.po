@@ -3370,7 +3370,3 @@ msgstr "Detect video extension from STRM URL"
 msgctxt "#33802"
 msgid "When video format cannot be determined from Emby metadata, STRM path or URL, use HEAD request to resolve final URL. This causes sync to be slower. Massively fetching download addresses may also trigger cloud provider risk controls. Use with caution."
 msgstr "When video format cannot be determined from Emby metadata, STRM path or URL, use HEAD request to resolve final URL. This causes sync to be slower. Massively fetching download addresses may also trigger cloud provider risk controls. Use with caution."
-
-msgctxt "#33803"
-msgid "Disable Emby nodes"
-msgstr "Disable Emby nodes"
